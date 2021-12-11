@@ -8,8 +8,6 @@ from typing import Optional, Dict, List, Literal, Union
 from user import User, Group
 from terminal import Terminal
 from file_system import StdFS
-import sys
-#sys.path.insert('')
 from lib import unistd, term
 
 class Computer:
@@ -57,17 +55,23 @@ class Computer:
         elif not args:
             module.main()
         else:
-            arg_string = ""
-            for arg in args:
-                arg_string += arg
-            module.main(arg_string)
+            module.main(args)
 
-    def chdir(self, path):
+    def chdir(self, path: Union[str, List[str]]):
         """ Changes current directory """
 
         file = self.fs.find_dir(path)
         self.terminal.set_curr_dir(file)
         #self.terminal.curr_dir = f"/{file}"
+
+    def mkdir(self, name: str):
+        self.fs.make_dir(name)
+
+    def touch(self, name: str, content: str):
+        self.fs.make_file(name, content)
+
+    def rm(self, name: str):
+        self.fs.delete(name)
     
     def get_start_time(self):
         return self.start_time

@@ -83,11 +83,50 @@ class StdFS:
     def get_root(self):
         return self.root
 
+    def make_dir(self, name: str):
+        """ Creates a directory in the local path """
+        #TODO make absolute path too.
+
+        curr_dir = self.computer.terminal.get_curr_dir()
+
+        _dir = Directory(name, curr_dir, 0, 0)
+        curr_dir.add_file(_dir)
+
+    def make_file(self, name: str, content: str):
+        """ Creates a file in the local path """
+        #TODO make absolute path too.
+
+        curr_dir = self.computer.terminal.get_curr_dir()
+
+        file = File(name, content, curr_dir, 0, 0)
+        curr_dir.add_file(file)
+
+    def delete(self, name: str, curr_dir = None):
+        if curr_dir is None:
+            curr_dir = self.computer.terminal.get_curr_dir()
+
+        file = curr_dir.find(name)
+        if file is not None:
+            if file.is_file():
+                del curr_dir.files[name]
+            elif file.files:
+                try:
+                    for f, v in file.files.items():
+                        if v.is_file():
+                            del file.files[v.name]
+                            continue
+                        # If v is not a file
+                        curr_dir = v
+                        return self.delete(f, curr_dir)
+                except RuntimeError:
+                    pass
+            #del curr_dir.files[name]
+
     def init_bin(self):
         bin_dir = self.root.find('bin')
         files = os.listdir(__BIN__)
         for file in files:
-            if file not in ['__init__.py', '__pychache__', '.vscode']:
+            if file not in ['__init__.py', '__pycache__', '.vscode']:
                 bin_file = File(file.replace(".py", ""), "Cannot read binary data.", bin_dir, 0, 0)
                 bin_dir.add_file(bin_file)
     
