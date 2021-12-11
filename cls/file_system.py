@@ -1,13 +1,12 @@
 import json
 import sys, os
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Union
 from os import path
-from .computer import Computer
-from .user import User
+from user import User
+from utils import response
 
 __THIS_FOLDER__ = path.dirname(__file__)
 __BIN__ = path.join(__THIS_FOLDER__, 'bin')
-__HOME__ = path.join(__THIS_FOLDER__, 'home')
 __LIB__ = path.join(__THIS_FOLDER__, 'lib')
 __ROOT__ = path.join(__THIS_FOLDER__, 'root')
 __USR__ = path.join(__THIS_FOLDER__, 'usr')
@@ -40,20 +39,35 @@ class Directory(FileSystem):
             self.files[file.name] = file
 
     def find(self, file):
+        if file.startswith('/'):
+            file = file.split('/')
+            del file[0]
+            return self.files.get(file[0], None)
+        
         return self.files.get(file, None)
+
+    def get_parent(self):
+        return self.parent if self.name != '/' else None 
 
 class File(FileSystem):
 
-    def __init__(self, name: str, content: str, parent: Optional["Directory"], owner: int, group_owner: int):
+    def __init__(self, name: str, content: str, parent: Optional[Directory], owner: int, group_owner: int):
         super().__init__(name, parent, owner, group_owner)
         self.content = content
         self.size = sys.getsizeof(self.name + self.content)
 
+    def read(self):
+        return self.content
+
 class StdFS:
 
-    def __init__(self, computer: Computer):
+    # Global directory with directory names
+    __DIR__  = {}
+
+    def __init__(self, computer: object):
         self.computer = computer
         self.root = Directory("/", None, 0, 0)
+        StdFS.__DIR__[self.root] = {}
 
         self.initialize()
 
@@ -62,34 +76,85 @@ class StdFS:
         for dir in root_directories:
             directory = Directory(dir, self.root, 0, 0)
             self.root.add_file(directory)
+            StdFS.__DIR__[self.root][directory] = [] if dir in ['bin', 'lib'] else {}
 
         self.init_bin()
-        self.init_etc()
-        #self.init_home()
+        #self.init_etc()
+        self.init_home()
         #self.init_lib()
         #self.init_root()
         #self.init_usr()
+
+    def get_root(self):
+        return self.root
 
     def init_bin(self):
         bin_dir = self.root.find('bin')
         files = os.listdir(__BIN__)
         for file in files:
-            path = __BIN__ + f'/{file}'
-            with open(path, 'r') as f:
-                if file not in ['__init__.py']:
-                    bin_file = File(file, f.read(), self.root.files['bin'], 0, 0)
-                    bin_dir.add_file(bin_file)
+            if file not in ['__init__.py', '__pychache__', '.vscode']:
+                bin_file = File(file.replace(".py", ""), "Cannot read binary data.", bin_dir, 0, 0)
+                bin_dir.add_file(bin_file)
+                StdFS.__DIR__[self.root][bin_dir].append(bin_file)
+                
     
-    def init_etc(self):
-        etc_dir = self.root.find('etc')
-        skeleton: Directory = Directory('skeleton', etc_dir, 0, 0)
+    def init_home(self):
+        home_dir = self.root.find('home')
+        user: Directory = Directory(self.computer.session.username, home_dir, 0, 0)
+        h = StdFS.__DIR__[self.root][home_dir]
+        h[user] = {}
 
-        etc_dir.add_file(skeleton)
+        home_dir.add_file(user)
 
-        folders = ['Desktop', 'Downloads', 'Pictures', 'Music']
-        for folder in folders:
-            d: Directory = Directory(folder, skeleton, 0, 0)
-            skeleton.add_file(d)
+        def init_user():
+            folders = ['Desktop', 'Downloads', 'Pictures', 'Music']
+            for folder in folders:
+                d: Directory = Directory(folder, user, 0, 0)
+                user.add_file(d)
+                h[user][d] = {}
+                
+
+        return init_user()
+
+    def find_dir(self, path: Union[str, List[str]], parent: Optional[str] = None) -> Directory:
+        """ 
+        Finds a specific directory
+        returns: Directory 
+        """
+
+        # If path starts at root level
+        dir: Optional[File] = parent
+
+        curr_dir = self.computer.terminal.get_curr_dir()
+
+
+        if path.startswith('/'):
+            param = path.split('/')
+            del param[0] # del ""
+            if param[0] in ['bin', 'etc', 'home', 'lib', 'root', 'usr']:
+                dir = self.root.find(param[0])
+            
+            if len(param) > 1:
+                del param[0]
+                self.find(path = param, parent = dir)
+        
+        if isinstance(path, str):
+            dir = curr_dir.find(path)
+            if dir.is_dir():
+                return dir
+            print("Directory not found.")
+
+        elif isinstance(path, list):
+            param = path.split('/')
+            dir = curr_dir.find(param[0])
+            if dir.is_dir() and len(param) > 1:
+                del param[0]
+                self.find(path = param, parent = dir)
+
+        return dir
+        
+
+
 
     """ def init_lib(self):
         home_dir = self.root.find("home")

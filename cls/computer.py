@@ -1,10 +1,16 @@
 import os
+import importlib
 from time import time, sleep
 from datetime import datetime
 from hashlib import md5
-from typing import Optional, Dict, List, Literal
+from typing import Optional, Dict, List, Literal, Union
 
-from .user import User, Group
+from user import User, Group
+from terminal import Terminal
+from file_system import StdFS
+import sys
+#sys.path.insert('')
+from lib import unistd, term
 
 class Computer:
 
@@ -19,8 +25,48 @@ class Computer:
         self.fs = None
         self.public_ip: str
         self.local_ip: str
-        self.env = {"$PATH":None, "$HOME":None, "$PWD":f"/home/{self.session.username}"}
+        self.env: dict = {"$PATH":None, "$HOME":None, "$CWD":None}
 
+    def init(self, data):
+        self.create_user((data[0], data[1]))
+        self.set_hostname(data[2])
+        self.set_fs()
+        self.set_env_var('$PATH')
+        self.set_env_var('$HOME')
+        self.set_env_var('$CWD')
+        self.set_terminal()
+        
+    def update_lib(self):
+        """ To run a command there is a need to access a System Library. 
+        Before the command runs, a reference is passed to the Computer object.
+        This way we avoid to use the Computer object as an argument for the commands."""
+
+        libs = [unistd, term]
+        for lib in libs:
+            lib.update(self)
+
+    def run(self):
+        self.terminal.run()
+
+    def run_command(self, cmd: str, args: Union[str, List[str], None]):
+
+        self.update_lib()
+        module = importlib.import_module(f"bin.{cmd}")
+        if len(args) == 1:
+            module.main(args[0])
+        else:
+            arg_string = ""
+            for arg in args:
+                arg_string += arg
+            module.main(arg_string)
+
+    def chdir(self, path):
+        """ Changes current directory """
+
+        file = self.fs.get_root().find(path)
+        self.terminal.set_curr_dir(file)
+        #self.terminal.curr_dir = f"/{file}"
+    
     def get_start_time(self):
         return self.start_time
 
@@ -45,8 +91,31 @@ class Computer:
     def get_local_ip(self):
         return self.local_ip
 
+    def set_terminal(self):
+        self.terminal: Terminal = Terminal(self)
+
+    def set_fs(self):
+        self.fs: StdFS = StdFS(self)
+
+    def set_env_var(self, var: str, value: str = None):
+        default_env_var = {"$PATH":["/bin"], "$HOME":f"/home", "$CWD":self.fs.get_root()}
+        if not value:
+            self.env[var] = default_env_var[var]
+            return
+        self.env[var] = value        
+
     def get_env_var(self, var):
         return self.env[var]
+
+    def get_current_directory(self):
+        return self.fs.get_root()
+
+
+    def create_user(self, user):
+        self.session = User(username = user[0], password = user[1])
+
+    def set_hostname(self, hostname: str):
+        self.hostname = hostname
 
     def change_session(self):
         pass

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 
 class User:
 
@@ -7,3 +7,8 @@ class User:
         self.username: Optional[str] = username
         self.password: Optional[str] = password
         self.name: Optional[str] = name
+
+class Group:
+
+    def __init__(self):
+        pass
