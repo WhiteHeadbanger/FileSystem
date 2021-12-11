@@ -116,19 +116,28 @@ class StdFS:
 
         return init_user()
 
-    def find_dir(self, path: Union[str, List[str]], parent: Optional[str] = None) -> Directory:
+    def find_dir(self, path: Union[str, List[str]]) -> Directory:
         """ 
         Finds a specific directory
         returns: Directory 
         """
 
-        # If path starts at root level
-        dir: Optional[File] = parent
-
+        # Current directory
         curr_dir = self.computer.terminal.get_curr_dir()
 
+        # If path is referencing /, return root directory (not '/root')
+        if path == '/':
+            return self.root
 
-        if path.startswith('/'):
+        # If path is '..', return parent directory if not root, else return nothing (TODO: standarize response messages)
+        if path == '..':
+            parent_dir = curr_dir.get_parent()
+            if parent_dir is None:
+                print("Directory not found.")
+                return
+            return parent_dir
+
+        if isinstance(path, str) and path.startswith('/'):
             param = path.split('/')
             del param[0] # del ""
             if param[0] in ['bin', 'etc', 'home', 'lib', 'root', 'usr']:
@@ -136,20 +145,30 @@ class StdFS:
             
             if len(param) > 1:
                 del param[0]
-                self.find(path = param, parent = dir)
+                self.computer.terminal.set_curr_dir(dir)
+                return self.find_dir(path = param)
+            
+            return dir
         
-        if isinstance(path, str):
-            dir = curr_dir.find(path)
-            if dir.is_dir():
+        elif isinstance(path, str):
+            param = path.split('/')
+            dir = curr_dir.find(param[0])
+            if dir.is_dir(): 
+                if len(param) > 1:
+                    del param[0]
+                    self.computer.terminal.set_curr_dir(dir)
+                    return self.find_dir(path = param)
                 return dir
             print("Directory not found.")
 
         elif isinstance(path, list):
-            param = path.split('/')
+            param = path
             dir = curr_dir.find(param[0])
             if dir.is_dir() and len(param) > 1:
                 del param[0]
-                self.find(path = param, parent = dir)
+                self.computer.terminal.set_curr_dir(dir)
+                return self.find_dir(path = param)
+            return dir
 
         return dir
         

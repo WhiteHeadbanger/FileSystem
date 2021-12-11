@@ -63,7 +63,7 @@ class Computer:
     def chdir(self, path):
         """ Changes current directory """
 
-        file = self.fs.get_root().find(path)
+        file = self.fs.find_dir(path)
         self.terminal.set_curr_dir(file)
         #self.terminal.curr_dir = f"/{file}"
     
