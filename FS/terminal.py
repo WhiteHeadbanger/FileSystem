@@ -33,8 +33,12 @@ class Terminal:
         self.computer.run_command(command_name, args)
         return (command_name, args)
 
-    def output(self, cmd):
-        print(cmd)
+    def output(self, msg):
+        if isinstance(msg, dict):
+            for files in msg.keys():
+                print(files)
+        else:
+            print(msg)
 
     def input(self):
         cmd = None
@@ -49,6 +53,6 @@ class Terminal:
         msg = "Hello"
         self.output(msg)
         while self.running:
-            msg = self.input()
-            self.output(f"{msg[0]} {msg[1][0]}")
+            self.input()
+            
             

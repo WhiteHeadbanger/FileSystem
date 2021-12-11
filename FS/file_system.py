@@ -153,11 +153,13 @@ class StdFS:
         elif isinstance(path, list):
             param = path
             dir = curr_dir.find(param[0])
-            if dir.is_dir() and len(param) > 1:
-                del param[0]
-                self.computer.terminal.set_curr_dir(dir)
-                return self.find_dir(path = param)
-            return dir
+            if dir.is_dir():
+                if len(param) > 1:
+                    del param[0]
+                    self.computer.terminal.set_curr_dir(dir)
+                    return self.find_dir(path = param)
+                return dir
+            print("Directory not found.")
 
         return dir
         

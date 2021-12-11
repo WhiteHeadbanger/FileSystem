@@ -54,6 +54,8 @@ class Computer:
         module = importlib.import_module(f"bin.{cmd}")
         if len(args) == 1:
             module.main(args[0])
+        elif not args:
+            module.main()
         else:
             arg_string = ""
             for arg in args:
