@@ -61,13 +61,9 @@ class File(FileSystem):
 
 class StdFS:
 
-    # Global directory with directory names
-    __DIR__  = {}
-
     def __init__(self, computer: object):
         self.computer = computer
         self.root = Directory("/", None, 0, 0)
-        StdFS.__DIR__[self.root] = {}
 
         self.initialize()
 
@@ -76,7 +72,6 @@ class StdFS:
         for dir in root_directories:
             directory = Directory(dir, self.root, 0, 0)
             self.root.add_file(directory)
-            StdFS.__DIR__[self.root][directory] = [] if dir in ['bin', 'lib'] else {}
 
         self.init_bin()
         #self.init_etc()
@@ -95,14 +90,10 @@ class StdFS:
             if file not in ['__init__.py', '__pychache__', '.vscode']:
                 bin_file = File(file.replace(".py", ""), "Cannot read binary data.", bin_dir, 0, 0)
                 bin_dir.add_file(bin_file)
-                StdFS.__DIR__[self.root][bin_dir].append(bin_file)
-                
     
     def init_home(self):
         home_dir = self.root.find('home')
         user: Directory = Directory(self.computer.session.username, home_dir, 0, 0)
-        h = StdFS.__DIR__[self.root][home_dir]
-        h[user] = {}
 
         home_dir.add_file(user)
 
@@ -110,9 +101,7 @@ class StdFS:
             folders = ['Desktop', 'Downloads', 'Pictures', 'Music']
             for folder in folders:
                 d: Directory = Directory(folder, user, 0, 0)
-                user.add_file(d)
-                h[user][d] = {}
-                
+                user.add_file(d)  
 
         return init_user()
 
