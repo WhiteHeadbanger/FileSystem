@@ -78,6 +78,9 @@ class Computer:
     def mv(self, source: str, destination: str) -> None:
         self.fs.move(source, destination)
     
+    def pwd(self) -> None:
+        return self.fs.print_working_directory()
+
     def get_start_time(self) -> datetime:
         return self.start_time
 

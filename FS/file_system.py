@@ -164,8 +164,27 @@ class StdFS:
             dst.add_file(src)
             self.delete(src.name, src_parent)
         
+    def print_working_directory(self, abspath: List = [], curr_dir: Directory = None) -> str:
+        """ Outputs absolute working directory """
         
+        if curr_dir is None:
+            curr_dir = self.computer.terminal.get_curr_dir()
+            abspath = []
+        
+        if curr_dir.name == '/':
+            if not abspath:
+                return '/'
+            abspath.reverse()
+            abspath = "".join(abspath)
+            return abspath        
 
+        abspath.append(curr_dir.name)
+        abspath.append('/')
+
+        parent = curr_dir.get_parent()
+        
+        while parent:
+            return self.print_working_directory(abspath = abspath, curr_dir = parent)
 
     def init_bin(self) -> None:
         bin_dir = self.root.find('bin')
