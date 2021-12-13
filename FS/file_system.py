@@ -5,6 +5,7 @@ from os import path
 from user import User
 from utils import response
 
+
 __THIS_FOLDER__ = path.dirname(__file__)
 __BIN__ = path.join(__THIS_FOLDER__, 'bin')
 __LIB__ = path.join(__THIS_FOLDER__, 'lib')
@@ -27,6 +28,21 @@ class FileSystem:
     def is_file(self):
         return type(self) == File
 
+    def get_name(self):
+        return self.name
+
+    def get_group_owner(self):
+        return self.group_owner
+
+    def get_permissions(self):
+        return self.permissions
+
+    def get_size(self):
+        return self.size
+
+    def get_parent(self):
+        return self.parent if self.name != '/' else None 
+
 class Directory(FileSystem):
 
     def __init__(self, name, parent, owner, group_owner):
@@ -46,9 +62,6 @@ class Directory(FileSystem):
         
         return self.files.get(file, None)
 
-    def get_parent(self):
-        return self.parent if self.name != '/' else None 
-
 class File(FileSystem):
 
     def __init__(self, name: str, content: str, parent: Optional[Directory], owner: int, group_owner: int):
@@ -61,13 +74,13 @@ class File(FileSystem):
 
 class StdFS:
 
-    def __init__(self, computer: object):
+    def __init__(self, computer: object) -> None:
         self.computer = computer
         self.root = Directory("/", None, 0, 0)
 
         self.initialize()
 
-    def initialize(self):
+    def initialize(self) -> None:
         root_directories = ['bin', 'etc', 'home', 'lib', 'root', 'usr']
         for dir in root_directories:
             directory = Directory(dir, self.root, 0, 0)
@@ -80,10 +93,10 @@ class StdFS:
         #self.init_root()
         #self.init_usr()
 
-    def get_root(self):
+    def get_root(self) -> Directory:
         return self.root
 
-    def make_dir(self, name: str):
+    def make_dir(self, name: str) -> None:
         """ Creates a directory in the local path """
         #TODO make absolute path too.
 
@@ -92,7 +105,7 @@ class StdFS:
         _dir = Directory(name, curr_dir, 0, 0)
         curr_dir.add_file(_dir)
 
-    def make_file(self, name: str, content: str):
+    def make_file(self, name: str, content: str) -> None:
         """ Creates a file in the local path """
         #TODO make absolute path too.
 
@@ -101,7 +114,10 @@ class StdFS:
         file = File(name, content, curr_dir, 0, 0)
         curr_dir.add_file(file)
 
-    def delete(self, name: str, curr_dir = None):
+    def delete(self, name: str, curr_dir: Directory = None) -> None:
+        """ Deletes a directory or file.  """
+        #TODO: make absolute path
+
         if curr_dir is None:
             curr_dir = self.computer.terminal.get_curr_dir()
 
@@ -110,19 +126,48 @@ class StdFS:
             if file.is_file():
                 del curr_dir.files[name]
             elif file.files:
+                _files = file.files.copy()
                 try:
-                    for f, v in file.files.items():
+                    for f, v in _files.items():
                         if v.is_file():
                             del file.files[v.name]
                             continue
                         # If v is not a file
                         curr_dir = v
-                        return self.delete(f, curr_dir)
+                    return self.delete(f, curr_dir)
                 except RuntimeError:
                     pass
             #del curr_dir.files[name]
+    
+    def move(self, source: str, dest: str) -> None:
+        """ Moves a file """
 
-    def init_bin(self):
+        src = self.find_dir(source)
+        dst = self.find_dir(dest)
+
+        if src is None:
+            print("Error: source path not recognized")
+            #TODO return Response(msg = "Error: source or destination path not recognized", data = (src, dst))
+        
+        # If we want to rename a file
+        elif dst is None:
+            src_parent = src.get_parent()
+            if src_parent is None:
+                src_parent = self.root
+            src_parent.files[dest] = src_parent.files.pop(src.name)
+            src.name = dest
+        
+        # If we want to move a file into a destination dir
+        elif src.is_file() and dst.is_dir():
+            src_parent = src.get_parent()
+            src.parent = dst
+            dst.add_file(src)
+            self.delete(src.name, src_parent)
+        
+        
+
+
+    def init_bin(self) -> None:
         bin_dir = self.root.find('bin')
         files = os.listdir(__BIN__)
         for file in files:
@@ -130,7 +175,7 @@ class StdFS:
                 bin_file = File(file.replace(".py", ""), "Cannot read binary data.", bin_dir, 0, 0)
                 bin_dir.add_file(bin_file)
     
-    def init_home(self):
+    def init_home(self) -> None:
         home_dir = self.root.find('home')
         user: Directory = Directory(self.computer.session.username, home_dir, 0, 0)
 
@@ -144,26 +189,26 @@ class StdFS:
 
         return init_user()
 
-    def find_dir(self, path: Union[str, List[str]]) -> Directory:
+    def find_dir(self, path: Union[str, List[str]], curr_dir: Directory = None) -> Union[Directory, File]:
         """ 
-        Finds a specific directory
-        returns: Directory 
+        Finds a specific directory of file within the file system
+        returns: Directory | File
         """
 
         # Current directory
-        curr_dir = self.computer.terminal.get_curr_dir()
+        if curr_dir is None:
+            curr_dir = self.computer.terminal.get_curr_dir()
 
         # If path is referencing /, return root directory (not '/root')
         if path == '/':
             return self.root
 
-        # If path is '..', return parent directory if not root, else return nothing (TODO: standarize response messages)
+        # Return parent if exists, otherwise return root (TODO: standarize response messages)
         if path == '..':
             parent_dir = curr_dir.get_parent()
-            if parent_dir is None:
-                print("Directory not found.")
-                return
-            return parent_dir
+            if parent_dir is not None:
+                return parent_dir
+            return self.root
 
         if isinstance(path, str) and path.startswith('/'):
             param = path.split('/')
@@ -173,34 +218,29 @@ class StdFS:
             
             if len(param) > 1:
                 del param[0]
-                self.computer.terminal.set_curr_dir(dir)
-                return self.find_dir(path = param)
+                return self.find_dir(path = param, curr_dir = dir)
             
             return dir
         
         elif isinstance(path, str):
             param = path.split('/')
             dir = curr_dir.find(param[0])
-            if dir.is_dir(): 
-                if len(param) > 1:
-                    del param[0]
-                    self.computer.terminal.set_curr_dir(dir)
-                    return self.find_dir(path = param)
-                return dir
-            print("Directory not found.")
+            if dir is not None:
+                if dir.is_dir(): 
+                    if len(param) > 1:
+                        del param[0]
+                        return self.find_dir(path = param, curr_dir = dir)
+            return dir
 
         elif isinstance(path, list):
             param = path
             dir = curr_dir.find(param[0])
-            if dir.is_dir():
-                if len(param) > 1:
-                    del param[0]
-                    self.computer.terminal.set_curr_dir(dir)
-                    return self.find_dir(path = param)
-                return dir
-            print("Directory not found.")
-
-        return dir
+            if dir is not None:
+                if dir.is_dir():
+                    if len(param) > 1:
+                        del param[0]
+                        return self.find_dir(path = param, curr_dir = dir)
+            return dir
         
 
 
