@@ -2,8 +2,7 @@ import json
 import sys, os
 from typing import Optional, Dict, List, Union
 from os import path
-from user import User
-from utils import response
+from utils import Response
 
 
 __THIS_FOLDER__ = path.dirname(__file__)
@@ -14,7 +13,7 @@ __USR__ = path.join(__THIS_FOLDER__, 'usr')
 
 class FileSystem:
 
-    def __init__(self, name: str, parent: Optional["Directory"], owner: int, group_owner: int):
+    def __init__(self, name: str, parent: Optional["Directory"], owner: int, group_owner: int) -> None:
         self.name: str = name
         self.parent = parent
         self.owner = owner
@@ -22,39 +21,56 @@ class FileSystem:
         self.permissions: Dict[str, str] = {}
         self.size: int
 
-    def is_dir(self):
+    def is_dir(self) -> bool:
+        """ Return true if file is a directory """
+
         return type(self) == Directory
 
-    def is_file(self):
+    def is_file(self) -> bool:
+        """ Return true if file is a file """
+
         return type(self) == File
 
-    def get_name(self):
+    def get_name(self) -> str:
+        """ Return file name """
+
         return self.name
 
-    def get_group_owner(self):
+    def get_group_owner(self) -> int:
+        """ Return file group owner """
+
         return self.group_owner
 
-    def get_permissions(self):
+    def get_permissions(self) -> Dict:
+        """ Return file permissions """
+
         return self.permissions
 
-    def get_size(self):
+    def get_size(self) -> int:
+        """ Return file size """
         return self.size
 
-    def get_parent(self):
+    def get_parent(self) -> Optional["Directory"]:
+        """ Return file parent """
+        
         return self.parent if self.name != '/' else None 
 
 class Directory(FileSystem):
 
-    def __init__(self, name, parent, owner, group_owner):
+    def __init__(self, name, parent, owner, group_owner) -> None:
         super().__init__(name, parent, owner, group_owner)
         self.files = {}
         self.size = None
 
-    def add_file(self, file):
+    def add_file(self, file) -> None:
+        """ Add a file or directory to child files """
+
         if file.name not in self.files.keys():
             self.files[file.name] = file
 
-    def find(self, file):
+    def find(self, file) -> Union["Directory", "File", None]:
+        """ Returns a child file or directory """
+
         if file.startswith('/'):
             file = file.split('/')
             del file[0]
@@ -64,12 +80,14 @@ class Directory(FileSystem):
 
 class File(FileSystem):
 
-    def __init__(self, name: str, content: str, parent: Optional[Directory], owner: int, group_owner: int):
+    def __init__(self, name: str, content: str, parent: Optional[Directory], owner: int, group_owner: int) -> None:
         super().__init__(name, parent, owner, group_owner)
         self.content = content
         self.size = sys.getsizeof(self.name + self.content)
 
-    def read(self):
+    def read(self) -> str:
+        """ Displays content from a file """
+
         return self.content
 
 class StdFS:
@@ -81,6 +99,8 @@ class StdFS:
         self.initialize()
 
     def initialize(self) -> None:
+        """ Creates root directories and initializes them """
+
         root_directories = ['bin', 'etc', 'home', 'lib', 'root', 'usr']
         for dir in root_directories:
             directory = Directory(dir, self.root, 0, 0)
@@ -187,6 +207,8 @@ class StdFS:
             return self.print_working_directory(abspath = abspath, curr_dir = parent)
 
     def init_bin(self) -> None:
+        """ Initializes /bin directory """
+
         bin_dir = self.root.find('bin')
         files = os.listdir(__BIN__)
         for file in files:
@@ -195,12 +217,14 @@ class StdFS:
                 bin_dir.add_file(bin_file)
     
     def init_home(self) -> None:
+        """ initializes /home directory """
+
         home_dir = self.root.find('home')
         user: Directory = Directory(self.computer.session.username, home_dir, 0, 0)
 
         home_dir.add_file(user)
 
-        def init_user():
+        def init_user() -> None:
             folders = ['Desktop', 'Downloads', 'Pictures', 'Music']
             for folder in folders:
                 d: Directory = Directory(folder, user, 0, 0)

@@ -1,4 +1,4 @@
-from file_system import StdFS
+from file_system import StdFS, Directory
 
 
 class Terminal:
@@ -13,16 +13,22 @@ class Terminal:
         self.outbox = []
         self.complete_outbox = []
 
-    def get_curr_dir(self):
+    def get_curr_dir(self) -> Directory:
+        """ Return current directory """
+
         return self.curr_dir
 
-    def set_curr_dir(self, dir):
+    def set_curr_dir(self, dir) -> None:
+        """ Sets current directory """
+
         self.curr_dir = dir
 
-    def get_path(self):
+    def get_path(self) -> list:
+        """ Returns a list of directories from which the system will look to execute commands """
+        
         return self.path
 
-    def parse_raw(self, cmd: str):
+    def parse_raw(self, cmd: str) -> None:
         """ Handles and parses the raw input"""
 
         command = cmd.split()
@@ -31,27 +37,30 @@ class Terminal:
         del command[0]
         args = command
         self.computer.run_command(command_name, args)
-        return (command_name, args)
+        #return (command_name, args)
 
-    def output(self, msg):
+    def output(self, msg) -> None:
+        """ Outputs a string on the screen """
+
         if isinstance(msg, dict):
             for files in msg.keys():
                 print(files)
         else:
             print(msg)
 
-    def input(self):
+    def input(self) -> None:
+        """ Command input """
         cmd = None
         while cmd is None:
             cmd = input(f"{self.computer.session.username}@{self.computer.hostname}#/{self.curr_dir.name}:> ")
-            parsed_cmd: tuple = self.parse_raw(cmd)
-        
-        return parsed_cmd
+            if cmd:
+                self.parse_raw(cmd)
 
-    def run(self):
+    def run(self) -> None:
+        """ Input loop """
         self.running = True
-        msg = "Hello"
-        self.output(msg)
+        #msg = "Hello"
+        #self.output(msg)
         while self.running:
             self.input()
             

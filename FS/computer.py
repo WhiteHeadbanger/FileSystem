@@ -26,6 +26,8 @@ class Computer:
         self.env: dict = {"$PATH":None, "$HOME":None, "$CWD":None}
 
     def init(self, data) -> None:
+        """ Initialize the computer """
+
         self.create_user((data[0], data[1]))
         self.set_hostname(data[2])
         self.set_fs()
@@ -44,9 +46,12 @@ class Computer:
             lib.update(self)
 
     def run(self) -> None:
+        """ Runs the terminal """
+
         self.terminal.run()
 
     def run_command(self, cmd: str, args: Union[str, List[str], None]) -> None:
+        """ Executes the built-in command's code"""
 
         self.update_lib()
         module = importlib.import_module(f"bin.{cmd}")
@@ -67,51 +72,83 @@ class Computer:
         # return Response(msg = "Error: path not recognizable")
 
     def mkdir(self, name: str) -> None:
+        """ Creates a directory """
+
         self.fs.make_dir(name)
 
     def touch(self, name: str, content: str) -> None:
+        """ Creates a file """
+        
         self.fs.make_file(name, content)
 
     def rm(self, name: str) -> None:
+        """ Deletes a file or directory """
+        
         self.fs.delete(name)
 
     def mv(self, source: str, destination: str) -> None:
+        """ Moves (rename) a file """
+        
         self.fs.move(source, destination)
     
     def pwd(self) -> None:
+        """ Prints working directory """
+
         return self.fs.print_working_directory()
 
     def get_start_time(self) -> datetime:
+        """ Returns boot start time """
+
         return self.start_time
 
     def get_hostname(self) -> str:
+        """ Returns computer's hostname """
+
         return self.hostname
 
     def get_users(self) -> Dict[int, User]:
+        """ Returns all users available """
+        
         return self.users
 
     def get_groups(self) -> Dict[int, Group]:
+        """ Returns all groups available """
+
         return self.groups
 
     def get_session(self) -> User:
+        """ Returns current session """
+        
         return self.session
 
     def get_terminal(self) -> Terminal:
+        """ Returns the terminal """
+        
         return self.terminal
 
     def get_public_ip(self) -> str:
+        """ Returns the public IP """
+        
         return self.public_ip
 
     def get_local_ip(self) -> str:
+        """ Returns the local IP """
+        
         return self.local_ip
 
     def set_terminal(self) -> None:
+        """ Creates the terminal """
+        
         self.terminal: Terminal = Terminal(self)
 
     def set_fs(self) -> None:
+        """ Creates the file system """
+        
         self.fs: StdFS = StdFS(self)
 
     def set_env_var(self, var: str, value: str = None) -> None:
+        """ Sets environment variable """
+        
         default_env_var = {"$PATH":["/bin"], "$HOME":f"/home", "$CWD":self.fs.get_root()}
         if not value:
             self.env[var] = default_env_var[var]
@@ -119,16 +156,21 @@ class Computer:
         self.env[var] = value        
 
     def get_env_var(self, var) -> Union[List, str, Directory]:
+        """ Returns a environment variable """
+        
         return self.env[var]
 
     def create_user(self, user) -> None:
+        """ Creates a new user """
+        
         self.session = User(username = user[0], password = user[1])
 
     def set_hostname(self, hostname: str) -> None:
+        """ Sets the computer hostname """
+        
         self.hostname = hostname
 
-    def change_session(self) -> None:
-        pass
-
     def logout(self) -> None:
+        """ Logs off the system """
+        
         pass
