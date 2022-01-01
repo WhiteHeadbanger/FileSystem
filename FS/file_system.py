@@ -206,7 +206,7 @@ class StdFS:
         while parent:
             return self.print_working_directory(abspath = abspath, curr_dir = parent)
 
-    def clear_screen(self) -> None:
+    def clear(self) -> None:
         """ Clear screen """
 
         # Windows

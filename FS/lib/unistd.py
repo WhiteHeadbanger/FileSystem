@@ -74,7 +74,7 @@ def pwd():
 
     return computer.pwd()
 
-def cls():
+def clear():
     """ Clear the screen """
 
-    return computer.cls()
+    return computer.clear()
