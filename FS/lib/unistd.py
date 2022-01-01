@@ -73,3 +73,8 @@ def pwd():
     """ Output absolute working directory """
 
     return computer.pwd()
+
+def cls():
+    """ Clear the screen """
+
+    return computer.cls()

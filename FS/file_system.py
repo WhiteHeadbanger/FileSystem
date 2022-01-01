@@ -206,6 +206,16 @@ class StdFS:
         while parent:
             return self.print_working_directory(abspath = abspath, curr_dir = parent)
 
+    def clear_screen(self) -> None:
+        """ Clear screen """
+
+        # Windows
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            #Linux and mac
+            os.system('clear')
+
     def init_bin(self) -> None:
         """ Initializes /bin directory """
 

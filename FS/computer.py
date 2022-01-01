@@ -96,6 +96,11 @@ class Computer:
 
         return self.fs.print_working_directory()
 
+    def cls(self) -> None:
+        """ Clear the screen """
+
+        return self.fs.clear_screen()
+
     def get_start_time(self) -> datetime:
         """ Returns boot start time """
 
