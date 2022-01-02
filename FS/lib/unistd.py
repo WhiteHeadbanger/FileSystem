@@ -83,3 +83,8 @@ def whoami():
     """ Return the logged username """
 
     return computer.whoami()
+
+def sudo(username: str = None):
+    """ Switch between registered users """
+
+    return computer.sudo(username)

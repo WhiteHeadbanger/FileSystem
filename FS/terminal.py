@@ -41,7 +41,7 @@ class Terminal:
         #return (command_name, args)
 
     def output(self, msg) -> None:
-        """ Outputs a string on the screen """
+        """ Outputs on the screen """
 
         if isinstance(msg, dict):
             for files in msg.keys():
@@ -51,6 +51,7 @@ class Terminal:
 
     def input(self) -> None:
         """ Command input """
+
         cmd = None
         sess_uid = self.computer.get_current_session().uid
         while cmd is None:
@@ -60,6 +61,7 @@ class Terminal:
 
     def run(self) -> None:
         """ Input loop """
+
         self.running = True
         #msg = "Hello"
         #self.output(msg)

@@ -1,5 +1,7 @@
 import json
 import sys, os
+from getpass import getpass
+
 from typing import Optional, Dict, List, Union
 from os import path
 from utils import Response
@@ -219,7 +221,46 @@ class StdFS:
     def whoami(self) -> None:
         """ Return the logged username """
 
-        pass
+        sess_uid = self.computer.current_session.uid
+        return self.computer.get_user_by(uid = sess_uid).username
+
+    def sudo(self, user_name: Optional[str] = None) -> None:
+        """ Switch between registered users """
+
+        if not user_name:
+            return
+        
+        current_userid = self.computer.current_session.uid
+        current_user = self.computer.get_user_by(uid = current_userid)
+        
+        # Check if username is the current session username
+        if user_name == current_user.username:
+            return
+
+        # Check if user exists on the computer
+        user = self.computer.get_user_by(username = user_name)
+        if user is None:
+            return print("Username does not exist.")
+
+        # Check if user session already exists
+        user = self.computer.get_user_by(username = user_name)
+        for session in self.computer.sessions:
+            if session.uid == user.uid:
+                password = getpass("Password: ")
+                if password != user.password:
+                    return print("Wrong password.")
+                self.computer.set_session(session)
+                return
+        
+        # Check if passwords matchs. If not, return
+        password = getpass("Password: ")
+        if password != user.password:
+            return print("Wrong password.")
+
+        # If user not exists, create it and set it as new session
+        self.computer.create_session(user.uid)
+        sessions = self.computer.get_sessions()
+        self.computer.set_session(sessions[-1])
 
     def init_bin(self) -> None:
         """ Initializes /bin directory """

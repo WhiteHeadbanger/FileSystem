@@ -74,6 +74,7 @@ class Computer:
 
         file = self.fs.find_dir(path)
         if file.is_dir() and file is not None:
+            self.current_session.curr_dir = file
             self.terminal.set_curr_dir(file)
             #self.terminal.curr_dir = f"/{file}"
         # return Response(msg = "Error: path not recognizable")
@@ -113,6 +114,11 @@ class Computer:
 
         return self.fs.whoami()
 
+    def sudo(self, username: Optional[str] = None) -> None:
+        """ Switch between registered users """
+
+        return self.fs.sudo(username)
+
     def get_start_time(self) -> datetime:
         """ Returns boot start time """
 
@@ -134,9 +140,11 @@ class Computer:
         if uid:
             user = self.users.get(uid)
         elif username:
-            for _, usr in self.users.items():
+            for usr in self.users.values():
                 if usr.username == username:
                     user = usr
+                    break
+                user = None
         else:
             user = None
 
@@ -153,6 +161,11 @@ class Computer:
         """ Returns current session """
         
         return self.current_session
+
+    def get_sessions(self) -> List[Session]:
+        """ Returns all sessions available """
+
+        return self.sessions
 
     def get_terminal(self) -> Terminal:
         """ Returns the terminal """
