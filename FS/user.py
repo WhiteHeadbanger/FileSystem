@@ -9,8 +9,3 @@ class User:
         self.password: Optional[str] = password
         self.name: Optional[str] = name
 
-class Group:
-    """ Represents a permission group """
-
-    def __init__(self) -> None:
-        pass

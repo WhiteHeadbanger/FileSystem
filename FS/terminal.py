@@ -6,8 +6,9 @@ class Terminal:
     def __init__(self, computer: object) -> None:
         self.computer = computer
         self.fs = computer.fs
-        self.rootdir  = computer.env.get("$CWD")
-        self.curr_dir = self.rootdir.find('home').find(self.computer.session.username)
+        #self.rootdir  = computer.env.get("$CWD")
+        sess_uid = computer.current_session.uid
+        self.curr_dir = computer.current_session.curr_dir.find('home').find(self.computer.get_user_by(uid = sess_uid).username)
         self.path: list = computer.env.get("$PATH")
 
         self.outbox = []
@@ -51,8 +52,9 @@ class Terminal:
     def input(self) -> None:
         """ Command input """
         cmd = None
+        sess_uid = self.computer.get_current_session().uid
         while cmd is None:
-            cmd = input(f"{self.computer.session.username}@{self.computer.hostname}#/{self.curr_dir.name}:> ")
+            cmd = input(f"{self.computer.get_user_by(uid = sess_uid).username}@{self.computer.hostname}#/{self.curr_dir.name}:> ")
             if cmd:
                 self.parse_raw(cmd)
 

@@ -78,3 +78,8 @@ def clear():
     """ Clear the screen """
 
     return computer.clear()
+
+def whoami():
+    """ Return the logged username """
+
+    return computer.whoami()

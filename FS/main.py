@@ -1,10 +1,18 @@
 from computer import Computer
+from getpass import getpass
 
 def main():
-    username = input("Username: ")
-    password = input("Password: ")
-    hostname = input("Hostname: ")
-    return username, password, hostname
+    while True:
+        fullname = input("Full name (optional): ")
+        username = input("Username: ")
+        password = getpass("Password: ")
+        password_confirm = getpass("Confirm password: ")
+        hostname = input("Hostname: ")
+        if password != password_confirm:
+            print("Password do not match.")
+        else:
+            break
+    return fullname, username, password, hostname
 
 if __name__ == '__main__':
     from sys import path
@@ -12,8 +20,8 @@ if __name__ == '__main__':
 
     path.append(dir(path[0]))
     
-    username, password, hostname = main()
+    fullname, username, password, hostname = main()
     computer = Computer()
-    computer.init((username, password, hostname))
+    computer.init((username, password, hostname, fullname))
     while True:
         computer.run()

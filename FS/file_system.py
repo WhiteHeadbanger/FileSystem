@@ -216,6 +216,11 @@ class StdFS:
             #Linux and mac
             os.system('clear')
 
+    def whoami(self) -> None:
+        """ Return the logged username """
+
+        pass
+
     def init_bin(self) -> None:
         """ Initializes /bin directory """
 
@@ -230,7 +235,10 @@ class StdFS:
         """ initializes /home directory """
 
         home_dir = self.root.find('home')
-        user: Directory = Directory(self.computer.session.username, home_dir, 0, 0)
+
+        for usr in self.computer.users.values():
+            username = usr.username if usr.username != "root" else None
+        user: Directory = Directory(username, home_dir, 0, 0)
 
         home_dir.add_file(user)
 

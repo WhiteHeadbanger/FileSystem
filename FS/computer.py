@@ -1,11 +1,14 @@
 import os
 import importlib
+import uuid
 from time import time, sleep
 from datetime import datetime
 from hashlib import md5
-from typing import Optional, Dict, List, Literal, Union
+from typing import Optional, Dict, List, Literal, Union, Tuple
 
-from user import User, Group
+from user import User
+from group import Group
+from session import Session
 from terminal import Terminal
 from file_system import StdFS, File, Directory
 from lib import unistd, term
@@ -15,9 +18,10 @@ class Computer:
     def __init__(self) -> None:
         self.start_time = datetime.now()
         self.hostname: Optional[str] = None
-        self.users: Dict[int, User] = {}
-        self.groups: Dict[int, Group] = {}
-        self.session: User = None
+        self.users: Dict[str, User] = {}
+        self.groups: Dict[str, Group] = {}
+        self.sessions: List[Session] = []
+        self.current_session: Session = None
         self.id = 1
         self.terminal = None
         self.fs = None
@@ -25,15 +29,18 @@ class Computer:
         self.local_ip: str
         self.env: dict = {"$PATH":None, "$HOME":None, "$CWD":None}
 
-    def init(self, data) -> None:
+    def init(self, userdata: Tuple[str]) -> None:
         """ Initialize the computer """
-
-        self.create_user((data[0], data[1]))
-        self.set_hostname(data[2])
+        self.create_root()
+        self.create_user((userdata[0], userdata[1], userdata[3]))
+        self.set_hostname(userdata[2])
         self.set_fs()
         self.set_env_var('$PATH')
         self.set_env_var('$HOME')
         self.set_env_var('$CWD')
+        user = self.get_user_by(username = userdata[0])
+        self.create_session(user.uid)
+        self.set_session(self.sessions[0])
         self.set_terminal()
         
     def update_lib(self) -> None:
@@ -101,6 +108,11 @@ class Computer:
 
         return self.fs.clear()
 
+    def whoami(self) -> None:
+        """ Return the logged username """
+
+        return self.fs.whoami()
+
     def get_start_time(self) -> datetime:
         """ Returns boot start time """
 
@@ -111,20 +123,36 @@ class Computer:
 
         return self.hostname
 
-    def get_users(self) -> Dict[int, User]:
+    def get_users(self) -> Dict[str, User]:
         """ Returns all users available """
         
         return self.users
+
+    def get_user_by(self, username: Optional[str] = None, uid: Optional[str] = None) -> Optional[User]:
+        """ Returns a user by its username or uid """
+
+        if uid:
+            user = self.users.get(uid)
+        elif username:
+            for _, usr in self.users.items():
+                if usr.username == username:
+                    user = usr
+        else:
+            user = None
+
+        return user
+
+
 
     def get_groups(self) -> Dict[int, Group]:
         """ Returns all groups available """
 
         return self.groups
 
-    def get_session(self) -> User:
+    def get_current_session(self) -> Session:
         """ Returns current session """
         
-        return self.session
+        return self.current_session
 
     def get_terminal(self) -> Terminal:
         """ Returns the terminal """
@@ -151,6 +179,19 @@ class Computer:
         
         self.fs: StdFS = StdFS(self)
 
+    def set_session(self, session: Session) -> None:
+        """ Sets current shell session """
+
+        self.current_session = session
+
+    def get_session_by(self, uid: str) -> Session:
+        """ Returns a session by id """
+        
+        s = None
+        for sess in self.sessions:
+            s = sess if sess.uid == uid else None
+        return s
+
     def set_env_var(self, var: str, value: str = None) -> None:
         """ Sets environment variable """
         
@@ -165,15 +206,28 @@ class Computer:
         
         return self.env[var]
 
+    def create_root(self) -> None:
+        """ Creates the root user """
+
+        uid = uuid.uuid4().hex
+        self.users[uid] = User(uid = uid, username = "root", password = "toor", name = "root")
+
     def create_user(self, user) -> None:
         """ Creates a new user """
-        
-        self.session = User(username = user[0], password = user[1])
+
+        uid = uuid.uuid4().hex
+        self.users[uid] = User(uid = uid, username = user[0], password = user[1], name = user[2])
 
     def set_hostname(self, hostname: str) -> None:
         """ Sets the computer hostname """
         
         self.hostname = hostname
+
+    def create_session(self, uid) -> None:
+        """ Creates a shell session """
+
+        id = uuid.uuid4().hex
+        self.sessions.append(Session(id = id, uid = uid, curr_dir = self.env.get("$CWD")))
 
     def logout(self) -> None:
         """ Logs off the system """
