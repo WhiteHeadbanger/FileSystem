@@ -236,11 +236,15 @@ class Computer:
         
         self.hostname = hostname
 
-    def create_session(self, uid) -> None:
+    def create_session(self, uid: str, dir: Optional[Directory] = None) -> None:
         """ Creates a shell session """
 
         id = uuid.uuid4().hex
-        self.sessions.append(Session(id = id, uid = uid, curr_dir = self.env.get("$CWD")))
+        if not dir:
+            return self.sessions.append(Session(id = id, uid = uid, curr_dir = self.env.get("$CWD")))
+        
+        self.sessions.append(Session(id = id, uid = uid, curr_dir = dir))
+
 
     def logout(self) -> None:
         """ Logs off the system """

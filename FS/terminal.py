@@ -1,4 +1,5 @@
 from file_system import StdFS, Directory
+from typing import Optional
 
 
 class Terminal:
@@ -9,6 +10,7 @@ class Terminal:
         #self.rootdir  = computer.env.get("$CWD")
         sess_uid = computer.current_session.uid
         self.curr_dir = computer.current_session.curr_dir.find('home').find(self.computer.get_user_by(uid = sess_uid).username)
+        computer.current_session.curr_dir = self.curr_dir
         self.path: list = computer.env.get("$PATH")
 
         self.outbox = []
@@ -19,9 +21,9 @@ class Terminal:
 
         return self.curr_dir
 
-    def set_curr_dir(self, dir) -> None:
+    def set_curr_dir(self, dir: Directory) -> None:
         """ Sets current directory """
-
+        
         self.curr_dir = dir
 
     def get_path(self) -> list:

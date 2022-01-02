@@ -243,13 +243,13 @@ class StdFS:
             return print("Username does not exist.")
 
         # Check if user session already exists
-        user = self.computer.get_user_by(username = user_name)
         for session in self.computer.sessions:
             if session.uid == user.uid:
                 password = getpass("Password: ")
                 if password != user.password:
                     return print("Wrong password.")
                 self.computer.set_session(session)
+                self.computer.terminal.set_curr_dir(session.curr_dir)
                 return
         
         # Check if passwords matchs. If not, return
@@ -260,7 +260,9 @@ class StdFS:
         # If user not exists, create it and set it as new session
         self.computer.create_session(user.uid)
         sessions = self.computer.get_sessions()
-        self.computer.set_session(sessions[-1])
+        sess = sessions[-1]
+        self.computer.set_session(sess)
+        self.computer.terminal.set_curr_dir(sess.curr_dir)
 
     def init_bin(self) -> None:
         """ Initializes /bin directory """
