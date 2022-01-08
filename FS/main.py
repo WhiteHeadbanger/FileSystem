@@ -1,4 +1,5 @@
 from computer import Computer
+from osys import OS
 from getpass import getpass
 
 def main():
@@ -21,7 +22,8 @@ if __name__ == '__main__':
     path.append(dir(path[0]))
     
     fullname, username, password, hostname = main()
-    computer = Computer()
+    osys = OS()
+    computer = Computer(osys)
     computer.init((username, password, hostname, fullname))
     while True:
         computer.run()

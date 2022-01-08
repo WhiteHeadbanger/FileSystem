@@ -243,13 +243,19 @@ class StdFS:
             return print("Username does not exist.")
 
         # Check if user session already exists
-        for session in self.computer.sessions:
+        """ for session in self.computer.sessions:
             if session.uid == user.uid:
                 password = getpass("Password: ")
                 if password != user.password:
                     return print("Wrong password.")
                 self.computer.set_session(session)
                 self.computer.terminal.set_curr_dir(session.curr_dir)
+                return """
+
+        # If session already exists, encourage to use "exit" command to return.
+        for session in self.computer.sessions:
+            if session.uid == user.uid:
+                print("Use <exit> command to return to the previous session.")
                 return
         
         # Check if passwords matchs. If not, return
@@ -263,6 +269,21 @@ class StdFS:
         sess = sessions[-1]
         self.computer.set_session(sess)
         self.computer.terminal.set_curr_dir(sess.curr_dir)
+
+    def exit(self) -> None:
+        """ Exits current session and returns to the previous one. 
+        This command erases the current open shell """
+
+        # Check if there's a previous open shell
+        try: previous_session = self.computer.sessions[-2]
+        except IndexError: return
+
+        self.computer.set_session(previous_session)
+        self.computer.terminal.set_curr_dir(previous_session.curr_dir)
+
+        del self.computer.sessions[-1]
+
+        
 
     def init_bin(self) -> None:
         """ Initializes /bin directory """

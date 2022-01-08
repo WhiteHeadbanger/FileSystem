@@ -88,3 +88,8 @@ def sudo(username: str = None):
     """ Switch between registered users """
 
     return computer.sudo(username)
+
+def exit():
+    """ Exits current session and returns to the previous one """
+
+    return computer.exit()

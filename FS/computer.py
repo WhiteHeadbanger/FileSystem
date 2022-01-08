@@ -15,7 +15,8 @@ from lib import unistd, term
 
 class Computer:
 
-    def __init__(self) -> None:
+    def __init__(self, os) -> None:
+        self.os = os
         self.start_time = datetime.now()
         self.hostname: Optional[str] = None
         self.users: Dict[str, User] = {}
@@ -118,6 +119,11 @@ class Computer:
         """ Switch between registered users """
 
         return self.fs.sudo(username)
+
+    def exit(self) -> None:
+        """ Exits current session and returns to the previous one """
+
+        return self.fs.exit()
 
     def get_start_time(self) -> datetime:
         """ Returns boot start time """
