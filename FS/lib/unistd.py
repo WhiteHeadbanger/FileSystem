@@ -49,10 +49,10 @@ def chdir(path: str):
 
     return computer.chdir(path)
 
-def mkdir(dirname: str):
+def mkdir(dirname: str, source):
     """ Creates a directory"""
 
-    return computer.mkdir(dirname)
+    return computer.mkdir(dirname, source)
 
 def touch(filename: str, content: str):
     """ Creates a file """
@@ -93,3 +93,13 @@ def exit():
     """ Exits current session and returns to the previous one """
 
     return computer.exit()
+
+def listdir():
+    """ Return current directory """
+
+    return computer.current_session.get_curr_dir()
+
+def cat(file):
+    """ Reads from file """
+
+    return computer.cat(file)

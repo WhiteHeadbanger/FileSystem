@@ -4,7 +4,7 @@ from getpass import getpass
 
 from typing import Optional, Dict, List, Union
 from os import path
-from utils import Response
+from utils import Response, StandardStatus
 
 
 __THIS_FOLDER__ = path.dirname(__file__)
@@ -75,7 +75,7 @@ class Directory(FileSystem):
 
         if file.startswith('/'):
             file = file.split('/')
-            del file[0]
+            del file[0] # erases '/'
             return self.files.get(file[0], None)
         
         return self.files.get(file, None)
@@ -118,20 +118,18 @@ class StdFS:
     def get_root(self) -> Directory:
         return self.root
 
-    def make_dir(self, name: str) -> None:
+    def make_dir(self, name: str, source: Directory) -> None:
         """ Creates a directory in the local path """
         #TODO make absolute path too.
 
-        curr_dir = self.computer.terminal.get_curr_dir()
-
-        _dir = Directory(name, curr_dir, 0, 0)
-        curr_dir.add_file(_dir)
+        _dir = Directory(name, source, 0, 0)
+        source.add_file(_dir)
 
     def make_file(self, name: str, content: str) -> None:
         """ Creates a file in the local path """
         #TODO make absolute path too.
 
-        curr_dir = self.computer.terminal.get_curr_dir()
+        curr_dir = self.computer.current_session.get_curr_dir()
 
         file = File(name, content, curr_dir, 0, 0)
         curr_dir.add_file(file)
@@ -141,13 +139,39 @@ class StdFS:
         #TODO: make absolute path
 
         if curr_dir is None:
-            curr_dir = self.computer.terminal.get_curr_dir()
+            curr_dir = self.computer.current_session.get_curr_dir()
 
-        file = curr_dir.find(name)
-        if file is not None:
+        file_to_remove = curr_dir.find(name)
+        if file_to_remove is None:
+            return
+
+        elif file_to_remove.is_file():
+            file_to_remove.parent = None
+            del curr_dir.files[name]
+            return
+            
+        _files = file_to_remove.files.copy()
+        if not _files:
+            del curr_dir.files[name]
+            return
+
+        dirs_to_remove = []
+
+        # Loop through file_to_remove child files
+        for _, f in _files.items():
+            if f.is_dir():
+                if not f.files:
+                    f.parent = None
+                    del file_to_remove.files[f.name]
+                    continue
+                dirs_to_remove.append(f)
+            del file_to_remove.files[f.name]
+
+            
+        """ if file is not None:
             if file.is_file():
                 del curr_dir.files[name]
-            elif file.files:
+            else: 
                 _files = file.files.copy()
                 try:
                     for f, v in _files.items():
@@ -156,10 +180,10 @@ class StdFS:
                             continue
                         # If v is not a file
                         curr_dir = v
-                    return self.delete(f, curr_dir)
+                        return self.delete(f, curr_dir)
                 except RuntimeError:
                     pass
-            #del curr_dir.files[name]
+            #del curr_dir.files[name] """
     
     def move(self, source: str, dest: str) -> None:
         """ Moves a file """

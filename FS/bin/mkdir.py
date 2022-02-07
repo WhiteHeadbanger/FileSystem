@@ -1,4 +1,5 @@
-from lib.unistd import mkdir
+from lib.unistd import mkdir, listdir
 
 def main(filename):
-    mkdir(filename)
+    current_directory = listdir()
+    mkdir(filename, current_directory)

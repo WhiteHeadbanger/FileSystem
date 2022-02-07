@@ -12,11 +12,11 @@ from session import Session
 from terminal import Terminal
 from file_system import StdFS, File, Directory
 from lib import unistd, term
+from utils import Response, StandardStatus
 
 class Computer:
 
-    def __init__(self, os) -> None:
-        self.os = os
+    def __init__(self) -> None:
         self.start_time = datetime.now()
         self.hostname: Optional[str] = None
         self.users: Dict[str, User] = {}
@@ -62,7 +62,11 @@ class Computer:
         """ Executes the built-in command's code"""
 
         self.update_lib()
-        module = importlib.import_module(f"bin.{cmd}")
+        try:
+            module = importlib.import_module(f"bin.{cmd}")
+        except ModuleNotFoundError:
+            print("Command not recognized")
+            return
         if len(args) == 1:
             module.main(args[0])
         elif not args:
@@ -70,20 +74,21 @@ class Computer:
         else:
             module.main(args)
 
-    def chdir(self, path: Union[str, List[str]]) -> None:
+    def chdir(self, path: Union[str, List[str]]) -> Response:
         """ Changes current directory """
 
         file = self.fs.find_dir(path)
         if file.is_dir() and file is not None:
             self.current_session.curr_dir = file
             self.terminal.set_curr_dir(file)
-            #self.terminal.curr_dir = f"/{file}"
-        # return Response(msg = "Error: path not recognizable")
+            return Response(success = True)
+        
+        return Response(success = False, error_message = StandardStatus.IS_FILE)
 
-    def mkdir(self, name: str) -> None:
+    def mkdir(self, name: str, source) -> Response:
         """ Creates a directory """
 
-        self.fs.make_dir(name)
+        return Response(success = True, data = self.fs.make_dir(name, source))
 
     def touch(self, name: str, content: str) -> None:
         """ Creates a file """
@@ -99,6 +104,16 @@ class Computer:
         """ Moves (rename) a file """
         
         self.fs.move(source, destination)
+
+    def cat(self, file) -> Response:
+        """ Reads from file """
+
+        try:
+            file_reading = file.read()
+        except AttributeError:
+            return Response(success=False, error_message=StandardStatus.IS_DIR)
+        
+        return Response(success=True, data = file_reading)
     
     def pwd(self) -> None:
         """ Prints working directory """
