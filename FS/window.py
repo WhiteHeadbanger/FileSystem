@@ -70,7 +70,7 @@ class Terminal(StdWindow):
         super().draw()
 
     def update(self):
-
+        pass
 
 
 
