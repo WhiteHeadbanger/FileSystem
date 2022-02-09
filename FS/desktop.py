@@ -29,6 +29,7 @@ class Icon(pg.sprite.Sprite):
         self.rect = img.get_rect()
         self.rect.x = 200
         self.rect.y = 300
+        self.last_click = 1000
 
     def draw(self):
         self.screen.blit(self.image, self.rect)
@@ -37,4 +38,6 @@ class Icon(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
-                return True
+                if now - self.last_click <= DOUBLE_CLICK_TIMER:
+                    return True
+                self.last_click = now

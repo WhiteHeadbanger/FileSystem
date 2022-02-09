@@ -6,12 +6,13 @@ class StdWindow(pg.sprite.Sprite):
     def __init__(self, app, x, y, title):
         self.app = app
         self.screen = app.screen
+        self.title = title
         self.window = pg.rect.Rect(x, y, 600, 400)
         self.color = (0, 0, 0)
         self.title_bar = pg.rect.Rect(x, y, 600, 25)
         self.title_bar_color = (77, 77, 77)
         self.title_text = app.font.render(title, True, (255, 255, 255)) 
-        self.focused = True
+        self.focused = False
         self.parent = None
         self.minimized = False
         self.drag = False
@@ -32,6 +33,7 @@ class StdWindow(pg.sprite.Sprite):
                 mouseX, mouseY = event.pos
                 self.offsetX = self.window.x - mouseX
                 self.offsetY = self.window.y - mouseY
+                
 
         elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
             self.drag = False

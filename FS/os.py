@@ -4,6 +4,7 @@ from desktop import Icon
 from typing import List
 import sys
 from os import path
+from random import randint
 
 class OS:
 
@@ -15,7 +16,8 @@ class OS:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
 
-        self.open_windows = []
+        self.open_windows: List[StdWindow] = []
+        self.focused_window: StdWindow = None
         self.wallpaper = None
         self.load_data()
 
@@ -27,11 +29,10 @@ class OS:
         self.folder_icon = pg.image.load(path.join(img_folder, 'folder.png')).convert_alpha()
 
     def new(self):
-        """ Initialize variables and do initial setup """
+        """ Initialize variables """
 
         self.icons = pg.sprite.Group()
         self.font = pg.font.SysFont("Arial", 15)
-        #self.terminal_window = Terminal(self, 400, 400, "Terminal Test")
         self.terminal_icon = Icon(self, self.terminal_icon)
 
     def run(self):
@@ -48,9 +49,9 @@ class OS:
 
     def draw(self):
         self.screen.fill((255, 255, 255))
-        for window in self.open_windows:
-            window.draw()
         self.terminal_icon.draw()
+        for window in self.open_windows[::-1]:
+            window.draw()
         pg.display.flip()
 
     def events(self):
@@ -58,14 +59,26 @@ class OS:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
-            
+        
+            for window in self.open_windows:
+                if event.type == pg.MOUSEBUTTONDOWN and window.window.collidepoint(event.pos) and event.button == 1:
+                    window.focused = True
+                    self.focused_window = window
+                    self.open_windows.insert(0, self.open_windows.pop(self.open_windows.index(window)))
+                    break
+
+            for window in self.open_windows:
+                if self.focused_window != window:
+                    window.focused = False
+                    
+            execute_terminal = self.terminal_icon.events(event)
+
             for window in self.open_windows:
                 window.events(event)
-                
-            execute_terminal = self.terminal_icon.events(event)
-        
+
         if execute_terminal:
-            self.open_windows.append(Terminal(self, 200, 200, "Terminal"))
+            self.open_windows.append(Terminal(self, 200, 200, f"Terminal - {randint(0, 100)}"))
+
 
 if __name__ == '__main__':
     root = OS()
