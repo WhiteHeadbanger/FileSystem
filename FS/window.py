@@ -39,11 +39,11 @@ class StdWindow(pg.sprite.Sprite):
             self.drag = False
 
         elif event.type == pg.MOUSEMOTION:
-            if self.drag:
+            if self.drag and self.focused:
                 mouseX, mouseY = event.pos
-                self.move(mouseX + self.offsetX, mouseY + self.offsetY)
+                self.drag_window(mouseX + self.offsetX, mouseY + self.offsetY)
 
-    def move(self, x, y):
+    def drag_window(self, x, y):
         self.window.x, self.window.y = x, y
         self.title_bar.x, self.title_bar.y = x, y
 

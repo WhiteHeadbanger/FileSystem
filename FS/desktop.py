@@ -18,7 +18,7 @@ class TaskBar:
         self.icons = []
 
 class Icon(pg.sprite.Sprite):
-    """ Represents a program icon """
+    """ Represents a program icon on the desktop """
 
     def __init__(self, app, img):
         self.app = app
