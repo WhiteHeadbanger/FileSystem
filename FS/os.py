@@ -1,5 +1,5 @@
 import pygame as pg
-from window import StdWindow, Terminal
+from window import StdWindow, Terminal, ContextMenu
 from desktop import Icon
 from typing import List
 import sys
@@ -18,6 +18,7 @@ class OS:
 
         self.open_windows: List[StdWindow] = []
         self.focused_window: StdWindow = None
+        self.context_menu: ContextMenu = None
         self.wallpaper = None
         self.load_data()
 
@@ -52,6 +53,8 @@ class OS:
         self.terminal_icon.draw()
         for window in self.open_windows[::-1]:
             window.draw()
+        if self.context_menu:
+            self.context_menu.draw()
         pg.display.flip()
 
     def events(self):
@@ -59,6 +62,13 @@ class OS:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
+
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 3:
+                mouseX, mouseY = event.pos
+                self.context_menu = ContextMenu(self, mouseX, mouseY, ["Opt1", "Opt2", "Opt3"])
+
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and self.context_menu:
+                self.context_menu = None
         
             for window in self.open_windows:
                 if event.type == pg.MOUSEBUTTONDOWN and window.window.collidepoint(event.pos) and event.button == 1:
