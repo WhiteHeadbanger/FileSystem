@@ -1,5 +1,5 @@
 import pygame as pg
-from window import StdWindow, Terminal, ContextMenu
+from window import StdWindow, Terminal, ContextMenu, Folder
 from desktop import Icon, TaskBar
 from typing import List
 import sys
@@ -25,23 +25,23 @@ class OS:
 
     def load_data(self):
         game_folder = path.dirname(__file__)
-        img_folder = path.join(game_folder, 'img')
+        self.img_folder = path.join(game_folder, 'img')
 
         # DESKTOP IMAGE
-        self.terminal_desktop_image = pg.image.load(path.join(img_folder, 'terminal.png')).convert_alpha()
-        self.folder_desktop_image = pg.image.load(path.join(img_folder, 'folder.png')).convert_alpha()
+        self.terminal_desktop_image = pg.image.load(path.join(self.img_folder, 'terminal.png')).convert_alpha()
+        self.folder_desktop_image = pg.image.load(path.join(self.img_folder, 'folder.png')).convert_alpha()
 
         #THUMBNAILS
-        self.terminal_thumbnail_image = pg.image.load(path.join(img_folder, 'terminal_thumbnail.png')).convert_alpha()
-        self.folder_thumbnail_image = pg.image.load(path.join(img_folder, 'folder_thumbnail.png')).convert_alpha()
+        self.terminal_thumbnail_image = pg.image.load(path.join(self.img_folder, 'terminal_thumbnail.png')).convert_alpha()
+        self.folder_thumbnail_image = pg.image.load(path.join(self.img_folder, 'folder_thumbnail.png')).convert_alpha()
 
     def new(self):
         """ Initialize variables """
 
         self.icons = pg.sprite.Group()
         self.font = pg.font.SysFont("Arial", 15)
-        self.terminal_icon = Icon(self, x = 100, y = 100, img = self.terminal_desktop_image, thumbnail=self.terminal_thumbnail_image)
-        self.folder_icon = Icon(self, x = 100, y = 250, img = self.folder_desktop_image, thumbnail=self.folder_thumbnail_image)
+        self.terminal_icon = Icon(self, x = 100, y = 100, program_associated = "Terminal", img = self.terminal_desktop_image, thumbnail=self.terminal_thumbnail_image)
+        self.folder_icon = Icon(self, x = 100, y = 250, program_associated = "Folder", img = self.folder_desktop_image, thumbnail=self.folder_thumbnail_image)
         self.taskbar = TaskBar(self, x=0, y=SCREEN_HEIGHT - TASKBAR_HEIGHT)
 
     def run(self):
@@ -69,6 +69,7 @@ class OS:
 
     def events(self):
         execute_terminal = False
+        execute_folder = False
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
@@ -90,15 +91,16 @@ class OS:
             for window in self.open_windows:
                 if self.focused_window != window:
                     window.focused = False
+                window.events(event)
                     
             execute_terminal = self.terminal_icon.events(event)
-            self.folder_icon.events(event)
-
-            for window in self.open_windows:
-                window.events(event)
+            execute_folder = self.folder_icon.events(event)
 
         if execute_terminal:
             self.open_windows.append(Terminal(self, 200, 200, f"Terminal - {randint(0, 100)}"))
+        elif execute_folder:
+            self.open_windows.append(Folder(self, 200, 200, f"Folder - {randint(0, 100)}", self.folder_desktop_image))
+
 
 
 if __name__ == '__main__':

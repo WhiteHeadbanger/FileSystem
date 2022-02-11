@@ -38,9 +38,10 @@ class TaskBar:
 class Icon(pg.sprite.Sprite):
     """ Represents a program icon on the desktop """
 
-    def __init__(self, app, x, y, img = None, thumbnail = None):
+    def __init__(self, app, x, y, program_associated, img = None, thumbnail = None):
         self.id = randint(0, 100)
         self.app = app
+        self.program_associated = program_associated
         self.thumbnail = thumbnail
         self.groups = app.icons
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -49,6 +50,8 @@ class Icon(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.text = app.font.render(self.program_associated, True, (0, 0, 0))
+        """ self.text_rect = pg.rect.Rect(round(self.rect.x - (self.rect.x / 2)), self.rect.y + 100, 30, 10) """
         self.thumbnail_rect = self.thumbnail.get_rect()
         self.thumbnail_rect.x = x
         self.thumbnail_rect.y = y
@@ -68,6 +71,9 @@ class Icon(pg.sprite.Sprite):
         if self.ghost:
             self.ghost.screen.blit(self.ghost.image, self.ghost.rect)
         self.screen.blit(self.image, self.rect)
+        text_rect = self.text.get_rect(midbottom=self.rect.midbottom)
+        self.screen.blit(self.text, text_rect)
+
 
     def events(self, event):
         now = pg.time.get_ticks()
@@ -85,7 +91,7 @@ class Icon(pg.sprite.Sprite):
                     self.ghost_drag(mouseX, mouseY)
                     return
                 
-                self.ghost = Icon(self.app, x=self.rect.x, y=self.rect.y, img=self.image.copy(), thumbnail=self.thumbnail.copy())
+                self.ghost = Icon(self.app, x=self.rect.x, y=self.rect.y, program_associated = self.program_associated, img=self.image.copy(), thumbnail=self.thumbnail.copy())
                 self.ghost.image.set_alpha(175)
                 self.ghost.drag = True
                 self.ghost_drag(mouseX, mouseY)
@@ -103,7 +109,7 @@ class Icon(pg.sprite.Sprite):
 
     def icon_drop(self, event):
         if self.ghost.rect.collidepoint(event.pos) and self.app.taskbar.taskbar.collidepoint(event.pos):
-            self.app.taskbar.add_icon(Icon(self.app, x = 100, y = SCREEN_HEIGHT - 50, img = self.image.copy(), thumbnail = self.thumbnail.copy()))
+            self.app.taskbar.add_icon(Icon(self.app, x = 100, y = SCREEN_HEIGHT - 50, program_associated = self.program_associated, img = self.image.copy(), thumbnail = self.thumbnail.copy()))
             self.pinned = True
             return
         self.rect.x, self.rect.y = self.ghost.rect.x, self.ghost.rect.y

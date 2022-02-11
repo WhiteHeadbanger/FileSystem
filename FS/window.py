@@ -1,5 +1,6 @@
 import pygame as pg
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, List
+from os import path
 
 class StdWindow(pg.sprite.Sprite):
 
@@ -74,6 +75,25 @@ class Terminal(StdWindow):
     def update(self):
         pass
 
+class Folder(StdWindow):
+
+    def __init__(self, app, x, y, title, icon):
+        super().__init__(app, x, y, title)
+        self.icon = icon
+        self.icon_rect = self.icon.get_rect()
+        self.icon_rect.x = self.window.x + 50
+        self.icon_rect.y = self.window.y + 50
+        self.files: List[Folder] = []
+        self.parent: Optional[Folder] = None
+        self.color = (255, 255, 255)
+
+    def add_file(self, file):
+        self.files.append(file)
+
+    def draw(self):
+        super().draw()
+        for file in self.files:
+            self.screen.blit(self.screen, file.icon_rect)
 
 class ContextMenu:
     """ Represents the context menu that appears when the user right clicks on files, folders, the desktop or application. """
