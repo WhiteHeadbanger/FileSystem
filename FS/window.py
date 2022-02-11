@@ -35,7 +35,7 @@ class StdWindow(pg.sprite.Sprite):
                 self.offsetY = self.window.y - mouseY
                 
 
-        elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
+        elif event.type == pg.MOUSEBUTTONUP:
             self.drag = False
 
         elif event.type == pg.MOUSEMOTION:
@@ -81,6 +81,7 @@ class ContextMenu:
     def __init__(self, app, x, y, options):
         self.app = app
         self.screen = app.screen
+        # TODO options SHOULD be a list of classes 'MenuOption'. Maybe ContextMenu AND MenuOption should be a subclass for a Menu class.
         self.options = options
         self.background_color = (190, 190, 190)
         self.text_color = (0, 0, 0)
