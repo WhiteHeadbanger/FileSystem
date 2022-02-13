@@ -2,6 +2,7 @@ import pygame as pg
 from settings import *
 from random import randint
 from typing import Optional
+from window import Folder
 
 class Desktop:
     """ Represents the desktop view """
@@ -50,20 +51,20 @@ class Icon(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.text = app.font.render(self.program_associated, True, (0, 0, 0))
-        """ self.text_rect = pg.rect.Rect(round(self.rect.x - (self.rect.x / 2)), self.rect.y + 100, 30, 10) """
+        self.text = app.font.render(program_associated, True, (0, 0, 0))
         self.thumbnail_rect = self.thumbnail.get_rect()
         self.thumbnail_rect.x = x
         self.thumbnail_rect.y = y
         self.last_click = 1000
+        self.parent: Folder = None
         # In taskbar
         self.pinned: bool = False
-
         self.offsetX = 0
         self.offsetY = 0
         self.drag = False
         # The ghost is a ghost copy (a copy with transparency) that is created whem the icon is dragged. When the drag finishes, it is erased from view.
         self.ghost: Icon = None
+        self.focused: bool = False
         
 
 
@@ -88,28 +89,41 @@ class Icon(pg.sprite.Sprite):
             if self.drag:
                 mouseX, mouseY = event.pos
                 if self.ghost and self.ghost.drag:
-                    self.ghost_drag(mouseX, mouseY)
+                    self.drag_ghost(mouseX, mouseY)
                     return
                 
                 self.ghost = Icon(self.app, x=self.rect.x, y=self.rect.y, program_associated = self.program_associated, img=self.image.copy(), thumbnail=self.thumbnail.copy())
                 self.ghost.image.set_alpha(175)
                 self.ghost.drag = True
-                self.ghost_drag(mouseX, mouseY)
+                self.drag_ghost(mouseX, mouseY)
 
         elif event.type == pg.MOUSEBUTTONUP:
             self.drag = False
             if self.ghost:
-                self.icon_drop(event)
+                self.drop_icon(event)
                 self.ghost = None
 
-    def ghost_drag(self, mouseX, mouseY):
+    def drag_ghost(self, mouseX, mouseY):
         self.ghost.rect.x, self.ghost.rect.y = mouseX + self.ghost.offsetX, mouseY + self.ghost.offsetY
         self.ghost.offsetX, self.ghost.offsetY = self.ghost.rect.x - mouseX, self.ghost.rect.y - mouseY
         self.ghost.draw()
 
-    def icon_drop(self, event):
+    def drop_icon(self, event):
         if self.ghost.rect.collidepoint(event.pos) and self.app.taskbar.taskbar.collidepoint(event.pos):
             self.app.taskbar.add_icon(Icon(self.app, x = 100, y = SCREEN_HEIGHT - 50, program_associated = self.program_associated, img = self.image.copy(), thumbnail = self.thumbnail.copy()))
             self.pinned = True
             return
+
+        for window in self.app.open_windows:
+            if isinstance(window, Folder):
+                if self.ghost.rect.collidepoint(event.pos) and window.window.collidepoint(event.pos):
+                    window.add_file(self)
+                    self.parent = window
+                    return
+                elif self.ghost.rect.collidepoint(event.pos) and not self.rect.colliderect(window.window):
+                    if self.parent == window:
+                        window.del_file(self)
+                        self.parent = None
+                        return
+
         self.rect.x, self.rect.y = self.ghost.rect.x, self.ghost.rect.y

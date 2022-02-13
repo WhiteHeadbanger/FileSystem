@@ -77,23 +77,32 @@ class Terminal(StdWindow):
 
 class Folder(StdWindow):
 
-    def __init__(self, app, x, y, title, icon):
+    def __init__(self, app, x, y, title):
         super().__init__(app, x, y, title)
-        self.icon = icon
-        self.icon_rect = self.icon.get_rect()
-        self.icon_rect.x = self.window.x + 50
-        self.icon_rect.y = self.window.y + 50
-        self.files: List[Folder] = []
+        self.x = x
+        self.y = y
+        self.files = []
         self.parent: Optional[Folder] = None
         self.color = (255, 255, 255)
 
     def add_file(self, file):
         self.files.append(file)
 
+    def del_file(self, file):
+        self.files.pop(self.files.index(file))
+
     def draw(self):
         super().draw()
         for file in self.files:
-            self.screen.blit(self.screen, file.icon_rect)
+            self.screen.blit(file.image, file.rect)
+
+    def events(self, event):
+        super().events(event)
+        if event.type == pg.MOUSEMOTION:
+            if self.drag and self.focused:
+                for file in self.files:
+                    file.rect.x, file.rect.y = self.window.x + 50, self.window.y + 50
+        
 
 class ContextMenu:
     """ Represents the context menu that appears when the user right clicks on files, folders, the desktop or application. """

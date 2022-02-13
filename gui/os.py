@@ -99,7 +99,9 @@ class OS:
         if execute_terminal:
             self.open_windows.append(Terminal(self, 200, 200, f"Terminal - {randint(0, 100)}"))
         elif execute_folder:
-            self.open_windows.append(Folder(self, 200, 200, f"Folder - {randint(0, 100)}", self.folder_desktop_image))
+            f = Folder(self, 200, 200, f"Folder - {randint(0, 100)}")
+            self.open_windows.append(f)
+            
 
 
 
