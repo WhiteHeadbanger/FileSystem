@@ -9,8 +9,23 @@ class Desktop:
 
     def __init__(self, app):
         self.app = app
-        self.icons = []
-        self.taskbar: TaskBar = None
+        self.icon_size = 120
+        self.grid = []
+        self.taskbar = None
+
+    def make(self):
+        for x in range(0, self.icon_size):
+            self.grid.append([])
+            for y in range(0, self.icon_size):
+                self.canvas_grid[x].append(None)
+
+    def add_icon(self, icon, grid_x, grid_y):
+        self.grid[grid_x][grid_y] = icon
+
+    def remove_icon(self, icon, grid_x, grid_y):
+        self.grid[grid_x][grid_y] = None
+
+
 
 
 class TaskBar:

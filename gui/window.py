@@ -19,6 +19,9 @@ class StdWindow(pg.sprite.Sprite):
         self.drag = False
         self.offsetX = 0
         self.offsetY = 0
+        self.scroll = False
+        self.resizable = True
+
 
     def draw(self):
         pg.draw.rect(self.screen, self.color, self.window)
@@ -133,6 +136,57 @@ class ContextMenu:
 
     def events(self):
         pass
+
+
+class MessageBox(StdWindow):
+    """ Represents a box type window that displays a message. It can have one or more buttons. """
+
+    def __init__(self, app, x, y, title):
+        super().__init__(app, x, y, title)
+        self.scroll = False
+        self.resizable = False
+        self.window = pg.rect.Rect(x, y, 200, 125)
+        self.title_bar = pg.rect.Rect(x, y, 200, 25)
+        self.buttons = []
+
+    def add_button(self, label, absolute_position = None):
+        if absolute_position:
+            x, y = absolute_position
+
+        self.buttons.append(Button(self.app, x, y, label, None))
+
+    def draw(self):
+        super().draw()
+        for btn in self.buttons:
+            btn.draw()
+
+class Button:
+    """ Represents a button """
+
+    def __init__(self, app, x, y, label, action):
+        self.screen = app.screen
+        self.x = x
+        self.y = y
+        self.label = label
+        self.action = action
+        self.color = (120, 120, 120)
+        self.rect = pg.rect.Rect(x, y, 90, 20)
+        self.parent = None
+        self.clicked = False
+
+    def draw(self):
+        pg.draw.rect(self.screen, self.color, self.rect)
+
+    def events(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                self.clicked = True
+                
+        elif event.type == pg.MOUSEBUTTONUP:
+            if self.clicked:
+                print(self.action)
+            self.clicked = False
+
 
         
 
