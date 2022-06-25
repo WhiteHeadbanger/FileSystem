@@ -1,7 +1,7 @@
 from computer import Computer
 from getpass import getpass
 
-def main():
+def create_user():
     while True:
         fullname = input("Full name (optional): ")
         username = input("Username: ")
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     path.append(dir(path[0]))
     
-    fullname, username, password, hostname = main()
+    fullname, username, password, hostname = create_user()
     computer = Computer()
     computer.init((username, password, hostname, fullname))
     while True:

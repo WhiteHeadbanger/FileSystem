@@ -150,50 +150,32 @@ class StdFS:
             del curr_dir.files[name]
             return
             
-        _files = file_to_remove.files.copy()
-        if not _files:
+        childs_of_file = file_to_remove.files.copy()
+        if not childs_of_file:
             del curr_dir.files[name]
             return
 
-        dirs_to_remove = []
-
         # Loop through file_to_remove child files
-        for _, f in _files.items():
+        for _, f in childs_of_file.items():
             if f.is_dir():
                 if not f.files:
                     f.parent = None
                     del file_to_remove.files[f.name]
                     continue
-                dirs_to_remove.append(f)
             del file_to_remove.files[f.name]
 
-            
-        """ if file is not None:
-            if file.is_file():
-                del curr_dir.files[name]
-            else: 
-                _files = file.files.copy()
-                try:
-                    for f, v in _files.items():
-                        if v.is_file():
-                            del file.files[v.name]
-                            continue
-                        # If v is not a file
-                        curr_dir = v
-                        return self.delete(f, curr_dir)
-                except RuntimeError:
-                    pass
-            #del curr_dir.files[name] """
+        del curr_dir.files[name]
+
     
     def move(self, source: str, dest: str) -> None:
-        """ Moves a file """
+        """ Moves a file or directory """
 
         src = self.find_dir(source)
         dst = self.find_dir(dest)
+        current_dir = self.computer.current_session.get_curr_dir()
 
         if src is None:
-            print("Error: source path not recognized")
-            #TODO return Response(msg = "Error: source or destination path not recognized", data = (src, dst))
+            return Response(success = False, error_message = StandardStatus.NOT_FOUND, data = src)
         
         # If we want to rename a file
         elif dst is None:
@@ -202,13 +184,17 @@ class StdFS:
                 src_parent = self.root
             src_parent.files[dest] = src_parent.files.pop(src.name)
             src.name = dest
+            return Response(success = True)
         
-        # If we want to move a file into a destination dir
-        elif src.is_file() and dst.is_dir():
+        if dst.is_dir():
             src_parent = src.get_parent()
             src.parent = dst
             dst.add_file(src)
-            self.delete(src.name, src_parent)
+            del current_dir.files[src.name]
+            return Response(success = True)
+
+        return Response(success = False, error_message = StandardStatus.GENERIC_ERROR)
+
         
     def print_working_directory(self, abspath: List = [], curr_dir: Directory = None) -> str:
         """ Outputs absolute working directory """
@@ -282,7 +268,7 @@ class StdFS:
                 print("Use <exit> command to return to the previous session.")
                 return
         
-        # Check if passwords matchs. If not, return
+        # Check if passwords matches. If not, return
         password = getpass("Password: ")
         if password != user.password:
             return print("Wrong password.")
@@ -370,25 +356,19 @@ class StdFS:
                 return self.find_dir(path = param, curr_dir = dir)
             
             return dir
-        
+
         elif isinstance(path, str):
             param = path.split('/')
-            dir = curr_dir.find(param[0])
-            if dir is not None:
-                if dir.is_dir(): 
-                    if len(param) > 1:
-                        del param[0]
-                        return self.find_dir(path = param, curr_dir = dir)
-            return dir
 
         elif isinstance(path, list):
             param = path
-            dir = curr_dir.find(param[0])
-            if dir is not None:
-                if dir.is_dir():
-                    if len(param) > 1:
-                        del param[0]
-                        return self.find_dir(path = param, curr_dir = dir)
+        
+        dir = curr_dir.find(param[0])
+        if dir is not None:
+            if dir.is_dir(): 
+                if len(param) > 1:
+                    del param[0]
+                    return self.find_dir(path = param, curr_dir = dir)
             return dir
         
 

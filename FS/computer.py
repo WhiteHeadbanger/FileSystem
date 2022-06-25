@@ -78,7 +78,10 @@ class Computer:
         """ Changes current directory """
 
         file = self.fs.find_dir(path)
-        if file.is_dir() and file is not None:
+        if not file:
+            return Response(success = False, error_message = StandardStatus.NOT_FOUND)
+        
+        elif file.is_dir():
             self.current_session.curr_dir = file
             self.terminal.set_curr_dir(file)
             return Response(success = True)

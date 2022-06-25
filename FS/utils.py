@@ -18,6 +18,8 @@ class StandardStatus(Enum):
     IS_DIR = auto()
     # A directory was expected, but a file was given.
     IS_FILE = auto()
+    # File or directory not found
+    NOT_FOUND = auto()
 
 
 class Response:
