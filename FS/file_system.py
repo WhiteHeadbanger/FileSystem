@@ -1,21 +1,21 @@
-import json
-import sys, os
-from getpass import getpass
-
+from __future__ import annotations
 from typing import Optional, Dict, List, Union
-from os import path
+
+import sys, os
+
+from getpass import getpass
 from utils import Response, StandardStatus
 
 
-__THIS_FOLDER__ = path.dirname(__file__)
-__BIN__ = path.join(__THIS_FOLDER__, 'bin')
-__LIB__ = path.join(__THIS_FOLDER__, 'lib')
-__ROOT__ = path.join(__THIS_FOLDER__, 'root')
-__USR__ = path.join(__THIS_FOLDER__, 'usr')
+__THIS_FOLDER__ = os.path.dirname(__file__)
+__BIN__ = os.path.join(__THIS_FOLDER__, 'bin')
+__LIB__ = os.path.join(__THIS_FOLDER__, 'lib')
+__ROOT__ = os.path.join(__THIS_FOLDER__, 'root')
+__USR__ = os.path.join(__THIS_FOLDER__, 'usr')
 
 class FileSystem:
 
-    def __init__(self, name: str, parent: Optional["Directory"], owner: int, group_owner: int) -> None:
+    def __init__(self, name: str, parent: Optional[Directory], owner: int, group_owner: int) -> None:
         self.name: str = name
         self.parent = parent
         self.owner = owner
@@ -64,21 +64,21 @@ class Directory(FileSystem):
         self.files = {}
         self.size = None
 
-    def add_file(self, file) -> None:
+    def add_file(self, file: Directory | File) -> None:
         """ Add a file or directory to child files """
 
         if file.name not in self.files.keys():
             self.files[file.name] = file
 
-    def find(self, file) -> Union["Directory", "File", None]:
+    def find(self, filename: str) -> Union["Directory", "File", None]:
         """ Returns a child file or directory """
 
-        if file.startswith('/'):
-            file = file.split('/')
+        if filename.startswith('/'):
+            file = filename.split('/')
             del file[0] # erases '/'
             return self.files.get(file[0], None)
         
-        return self.files.get(file, None)
+        return self.files.get(filename, None)
 
 class File(FileSystem):
 
@@ -122,8 +122,8 @@ class StdFS:
         """ Creates a directory in the local path """
         #TODO make absolute path too.
 
-        _dir = Directory(name, source, 0, 0)
-        source.add_file(_dir)
+        dir = Directory(name, source, 0, 0)
+        source.add_file(dir)
 
     def make_file(self, name: str, content: str) -> None:
         """ Creates a file in the local path """
@@ -273,7 +273,7 @@ class StdFS:
         if password != user.password:
             return print("Wrong password.")
 
-        # If user not exists, create it and set it as new session
+        # If user session does not exists, create it and set it as new session
         self.computer.create_session(user.uid)
         sessions = self.computer.get_sessions()
         sess = sessions[-1]
@@ -352,10 +352,11 @@ class StdFS:
                 dir = self.root.find(param[0])
             
             if len(param) > 1:
+                dir = param[0]
                 del param[0]
-                return self.find_dir(path = param, curr_dir = dir)
+                return self.find_dir(path = param, curr_dir = curr_dir.find(dir))
             
-            return dir
+            return self.find_dir(path = param[0])
 
         elif isinstance(path, str):
             param = path.split('/')
