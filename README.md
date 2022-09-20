@@ -8,7 +8,7 @@ GUI is not functional, but usable. You can delete the entire folder if you want,
 * `whoami` (returns the username)
 * `touch <filename> <content>` (creates a file with a content, like a txt file)
 * `sudo root` (password: toor) (currently does nothing else besides changing the current user session)
-* `rm <filename>` (deletes a file)(only inside the current directory, for now)
+* `rm <filename>` (deletes a file)
 * `pwd` (prints working directory)
 * `mv <source file | dir> <destination dir>` (moves a file or directory)
 * `mkdir <dirname>` (creates a directory)
