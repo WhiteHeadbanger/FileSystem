@@ -2,7 +2,6 @@ from lib.unistd import touch
 
 def parse(args):
     #arg_list = args.split()
-    print(args)
     if isinstance(args, list):
         if len(args) > 1:
             filename = args[0]

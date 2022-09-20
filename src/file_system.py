@@ -4,6 +4,7 @@ from typing import Optional, Dict, List, Union
 import sys, os
 
 from getpass import getpass
+from status.file_status import FileStatus
 from status.response import Response
 from status.standard_status import StandardStatus
 
@@ -176,7 +177,7 @@ class StdFS:
         current_dir = self.computer.current_session.get_curr_dir()
 
         if src is None:
-            return Response(success = False, error_message = StandardStatus.NOT_FOUND, data = src)
+            return Response(success = False, error_message = FileStatus.NOT_FOUND, data = src)
         
         # If we want to rename a file
         elif dst is None:

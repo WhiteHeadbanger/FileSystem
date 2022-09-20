@@ -13,6 +13,9 @@ from terminal import Terminal
 from file_system import StdFS, File, Directory
 from lib import unistd, term
 from status.standard_status import StandardStatus
+from status.command_status import CommandStatus
+from status.file_status import FileStatus
+from status.session_status import SessionStatus
 from status.response import Response
 
 class Computer:
@@ -80,34 +83,34 @@ class Computer:
 
         file = self.fs.find_dir(path)
         if not file:
-            return Response(success = False, error_message = StandardStatus.NOT_FOUND)
+            return Response(success = False, error_message = FileStatus.NOT_FOUND)
         
         elif file.is_dir():
             self.current_session.curr_dir = file
             self.terminal.set_curr_dir(file)
             return Response(success = True)
         
-        return Response(success = False, error_message = StandardStatus.IS_FILE)
+        return Response(success = False, error_message = FileStatus.IS_FILE)
 
     def mkdir(self, name: str, source) -> Response:
         """ Creates a directory """
 
-        return Response(success = True, data = self.fs.make_dir(name, source))
+        return Response(success = True, func = self.fs.make_dir, name = name, source = source)
 
-    def touch(self, name: str, content: str) -> None:
+    def touch(self, name: str, content: str) -> Response:
         """ Creates a file """
-        
-        self.fs.make_file(name, content)
 
-    def rm(self, name: str) -> None:
+        return Response(success = True, func = self.fs.make_file, name = name, content = content)
+
+    def rm(self, name: str) -> Response:
         """ Deletes a file or directory """
         
-        self.fs.delete(name)
+        return Response(success = True, func = self.fs.delete, name = name)
 
-    def mv(self, source: str, destination: str) -> None:
+    def mv(self, source: str, destination: str) -> Response:
         """ Moves (rename) a file """
-        
-        self.fs.move(source, destination)
+
+        return Response(success = True, func = self.fs.move, source = source, dest = destination)
 
     def cat(self, file) -> Response:
         """ Reads from file """
@@ -115,34 +118,34 @@ class Computer:
         try:
             file_reading = file.read()
         except AttributeError:
-            return Response(success=False, error_message=StandardStatus.IS_DIR)
+            return Response(success=False, error_message=FileStatus.IS_DIR)
         
         return Response(success=True, data = file_reading)
     
-    def pwd(self) -> None:
+    def pwd(self) -> Response:
         """ Prints working directory """
 
-        return self.fs.print_working_directory()
+        return Response(success = True, func = self.fs.print_working_directory)
 
-    def clear(self) -> None:
+    def clear(self) -> Response:
         """ Clear the screen """
 
-        return self.fs.clear()
+        return Response(success = True, func = self.fs.clear)
 
-    def whoami(self) -> None:
+    def whoami(self) -> Response:
         """ Return the logged username """
 
-        return self.fs.whoami()
+        return Response(success = True, func = self.fs.whoami)
 
-    def sudo(self, username: Optional[str] = None) -> None:
+    def sudo(self, username: Optional[str] = None) -> Response:
         """ Switch between registered users """
 
-        return self.fs.sudo(username)
+        return Response(success = True, func = self.fs.sudo, user_name = username)
 
-    def exit(self) -> None:
+    def exit(self) -> Response:
         """ Exits current session and returns to the previous one """
 
-        return self.fs.exit()
+        return Response(success = True, func = self.fs.exit)
 
     def get_start_time(self) -> datetime:
         """ Returns boot start time """
