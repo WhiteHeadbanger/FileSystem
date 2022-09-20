@@ -4,7 +4,8 @@ from typing import Optional, Dict, List, Union
 import sys, os
 
 from getpass import getpass
-from utils import Response, StandardStatus
+from status.response import Response
+from status.standard_status import StandardStatus
 
 
 __THIS_FOLDER__ = os.path.dirname(__file__)

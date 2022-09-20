@@ -12,7 +12,8 @@ from session import Session
 from terminal import Terminal
 from file_system import StdFS, File, Directory
 from lib import unistd, term
-from utils import Response, StandardStatus
+from status.standard_status import StandardStatus
+from status.response import Response
 
 class Computer:
 
@@ -174,8 +175,6 @@ class Computer:
 
         return user
 
-
-
     def get_groups(self) -> Dict[int, Group]:
         """ Returns all groups available """
 
@@ -247,13 +246,13 @@ class Computer:
         """ Creates the root user """
 
         uid = uuid.uuid4().hex
-        self.users[uid] = User(uid = uid, username = "root", password = "toor", name = "root")
+        self.users[uid] = User(uid = uid, username = "root", password = "toor", fullname = "root")
 
     def create_user(self, user) -> None:
         """ Creates a new user """
 
         uid = uuid.uuid4().hex
-        self.users[uid] = User(uid = uid, username = user[0], password = user[1], name = user[2])
+        self.users[uid] = User(uid = uid, username = user[0], password = user[1], fullname = user[2])
 
     def set_hostname(self, hostname: str) -> None:
         """ Sets the computer hostname """

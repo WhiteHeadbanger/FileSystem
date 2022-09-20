@@ -1,0 +1,62 @@
+{
+    "CommandStatus": [
+        {
+            "name": "COMMAND_NOT_FOUND",
+            "str": "Requested command '%s' was not found on the system."
+        },
+        {
+            "name": "INVALID_ARGUMENT",
+            "str": "Invalid requested command arguments."
+        }
+    ],
+    "FileStatus": [
+        {
+            "name": "NOT_ALLOWED",
+            "str": "Permission denied."
+        },
+        {
+            "name": "CANNOT_EXECUTE",
+            "str": "There was a problem that prevented the execution."
+        },
+        {
+            "error_Fname": "IS_DIR",
+            "str": "The requested file is a directory."
+        },
+        {
+            "name": "IS_FILE",
+            "str": "The requested directory is a file."
+        },
+        {
+            "name": "NOT_FOUND",
+            "str": "The requested file or directory was not found on the system."
+        }
+    ],
+    "SessionStatus": [
+        {
+            "name": "USER_NOT_FOUND",
+            "str": "The requested user was not found."
+        },
+        {
+            "name": "USER_IN_CURRENT_SESSION",
+            "str": "The requested user is the current user."
+        },
+        {
+            "name": "USER_SESSION_ALREADY_EXISTS",
+            "str": "The requested user session is currently open."
+        },
+        {
+            "name": "WRONG_PASSWORD",
+            "str": "Wrong password."
+        }
+    ],
+    "StandardStatus": [
+        {
+            "name": "STATUS_OK",
+            "str": "OK."
+        },
+        {
+            "name": "GENERIC_ERROR",
+            "str": "There was an error."
+        }
+    ]
+}
