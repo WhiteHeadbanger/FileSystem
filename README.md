@@ -1,7 +1,7 @@
 # Virtual File System  
 
 This is a simple virtual file system inspired by Linux.
-GUI is not functional, but usable. You can delete the entire folder if you want.
+GUI is not functional, but usable. You can delete the entire folder if you want, it will not affect the functionality of the file system.
 
 ## Available commands
 
@@ -21,7 +21,7 @@ GUI is not functional, but usable. You can delete the entire folder if you want.
 ## How to execute
 
 1. Clone the project.
-2. Open a terminal in FS directory
+2. Open a terminal in 'src' directory
 3. Type `python3 main.py`
 4. Beware, it's buggy.
 
@@ -29,8 +29,12 @@ GUI is not functional, but usable. You can delete the entire folder if you want.
 
 * More commands.
 * Refactor, because the code is awful.
-* Eventually work on the GUI.
+* Maybe, eventually, work on the GUI.
 * Maaaaybe implement some kind of bash language, or an entirely new language to create scripts.
+
+## How to contribute
+
+If you feel like contributing, there's no standard protocol just yet, but you can clone the project and make a pull request. 
 
 
 
