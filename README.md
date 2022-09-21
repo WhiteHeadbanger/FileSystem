@@ -33,7 +33,7 @@ GUI is not functional, but usable. You can delete the entire folder if you want,
 * Maybe, eventually, work on the GUI.
 * Maaaaybe implement some kind of bash language, or an entirely new language to create scripts.
 
-(*) Planned commands are: man, chmod, sudo (expand it's currently functionalities)
+(*) Planned commands are: man, chmod, sudo (expand its current functionalities)
 
 ## How to contribute
 
