@@ -41,10 +41,10 @@ If you feel like adding a new feature, or improving the code to make it more cle
 
 1. Fork the repo
 2. Create a branch from `main`, and name it under type/name where type is:
-- feature
-- refactor
-- bugfix
-- documentation
+    - feature
+    - refactor
+    - bugfix
+    - documentation (can mean anything from code comments, to [future] man pages, docstrings)
 3. Make a pull request
 
 
