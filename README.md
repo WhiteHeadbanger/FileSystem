@@ -29,9 +29,10 @@ GUI is not functional, but usable. You can delete the entire folder if you want,
 ## Next steps in the project
 
 * More commands.
-    [] chmod
-    [] sudo (expand its current functionalities, but first we need chmod and permission groups)
-    [] man
+    - [ ] chmod
+    - [ ] sudo (expand its current functionalities, but first we need chmod)
+    - [ ] man
+    - [ ] add options to commands
 * Refactor and optimize.
 * Maybe, eventually, work on the GUI.
 * Maaaaybe implement some kind of bash language, or an entirely new language to create scripts.
